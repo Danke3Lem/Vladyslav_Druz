@@ -1,5 +1,4 @@
-#Task 1
-##How to install the project?
+Task 1 | How to install the project?
 ---
 1. Click on the **Code** button at the top of your page.
 2. Click on the **Download ZIP** button at the top of your page.
