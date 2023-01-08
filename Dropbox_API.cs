@@ -2,7 +2,7 @@ namespace WebAPI_Tests;
 
 public class DropboxApi
 {
-    private string _token = "sl.BWV0onZgVaZqZDcvAxu2V2v8Mmxz2RlUh42t0fJQgVLwPIeah3g5LP6O32umrpVUszJb6_YNL3tzd0WbdEJfWSzjeIDb5pOx1kZelJd93K_nbl2ww-iBtoZvPMHKrr6Ip4tvGGFMnMbR";
+    private string _token = "sl.BWh8ue1aw37CNvvDG4v8Y0_iNpZ-ls208GBgOndirVJocaJ9D1GsXnLGfuFs1XAn9BW1wIncEN-bNPPjDFBbjieU5-zDf-S6wS6c9xCzUj5vVOlBDcGfZQ4HwzSV7QYV_Dl1WfGL-pZr";
     private HttpClient _client;
 
     public DropboxApi()
@@ -10,46 +10,81 @@ public class DropboxApi
         _client = new HttpClient();
     }
 
-    public void UploadFileMethod(string file, string db_path)
+    public JObject UploadFileMethod(string file, string dbPath)
     {
         HttpRequestMessage req = new HttpRequestMessage
         {
             Method = HttpMethod.Post,
             RequestUri = new Uri("https://content.dropboxapi.com/2/files/upload"),
-            Headers = {{"Authorization", $"Bearer {_token}" }, { "Dropbox-API-Arg", $"{{\"path\":\"{db_path}\"}}"}},
+            Headers = {{"Authorization", $"Bearer {_token}" }, { "Dropbox-API-Arg", $"{{\"path\":\"{dbPath}\"}}"}},
             Content = new StreamContent(new FileStream(file, FileMode.Open)),
         };
 
         req.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
         HttpResponseMessage resp = _client.SendAsync(req).Result;
+        
+        //Checking for any errors code while uploading the file
+
+        if (resp.IsSuccessStatusCode)
+        {
+            return JObject.Parse(resp.Content.ReadAsStringAsync().Result);
+        }
+
+        else
+        {
+            throw new Exception("ERROR! Cannot upload the file, please, try again.");
+        }
     }
 
-    public JObject GetFileMetadataMethod(string db_path)
+    public JObject GetFileMetadataMethod(string dbPath)
     {
         HttpRequestMessage req = new HttpRequestMessage
         {
             Method = HttpMethod.Post,
             RequestUri = new Uri("https://api.dropboxapi.com/2/files/get_metadata"),
             Headers = {{"Authorization", $"Bearer {_token}"}},
-            Content = new StringContent($"{{\"path\": \"{db_path}\"}}", Encoding.UTF8, "application/json")
+            Content = new StringContent($"{{\"path\": \"{dbPath}\"}}", Encoding.UTF8, "application/json")
         };
 
         req.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
         HttpResponseMessage resp = _client.SendAsync(req).Result;
-        return JObject.Parse(resp.Content.ReadAsStringAsync().Result);
+        
+        //Checking for any errors code while getting metadata
+        
+        if (resp.IsSuccessStatusCode)
+        {
+            return JObject.Parse(resp.Content.ReadAsStringAsync().Result);
+        }
+
+        else
+        {
+            throw new Exception("ERROR! Cannot get metadata of the file, please, try again.");
+        }
     }
 
-    public void DeleteFileMethod(string db_path)
+    public JObject DeleteFileMethod(string dbPath)
     {
         HttpRequestMessage req = new HttpRequestMessage
         {
             Method = HttpMethod.Post,
             RequestUri = new Uri("https://api.dropboxapi.com/2/files/delete"),
             Headers = {{"Authorization", $"Bearer {_token}"}},
-            Content = new StringContent($"{{\"path\": \"{db_path}\"}}", Encoding.UTF8, "application/json")
+            Content = new StringContent($"{{\"path\": \"{dbPath}\"}}", Encoding.UTF8, "application/json")
         };
 
         req.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
         HttpResponseMessage resp = _client.SendAsync(req).Result;
+        
+        //Checking for any errors code while deleting the file
+
+        if (resp.IsSuccessStatusCode)
+        {
+            return JObject.Parse(resp.Content.ReadAsStringAsync().Result);
+        }
+
+        else
+        {
+            throw new Exception("ERROR! Cannot delete the file, please, try again.");
+        }
     }
 }  
